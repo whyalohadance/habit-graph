@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  name        String?
+  createdAt   DateTime @default(now())
+
+  goals       Goal[]
+  tasks       Task[]
+  completions DailyCompletion[]
+  dailyScores DailyScore[]
+}
+
+model Goal {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tasks       Task[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  isRecurring Boolean  @default(true) // true = каждый день, false = разовая
+  date        DateTime? // заполняется только для разовых задач
+  weight      Int      @default(1)    // "вес" задачи для расчета балла
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  goalId      String?
+  goal        Goal?    @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  completions DailyCompletion[]
+}
+
+model DailyCompletion {
+  id        String   @id @default(cuid())
+  date      DateTime // день выполнения (без времени)
+  completed Boolean  @default(true)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, date])
+}
+
+model DailyScore {
+  id            String   @id @default(cuid())
+  date          DateTime
+  rawScore      Float    // доля выполненных задач за день (с учетом веса)
+  smoothedScore Float    // сглаженное значение (EMA) - это и есть точка на графике
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
