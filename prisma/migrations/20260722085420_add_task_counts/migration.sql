@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "DailyScore" ADD COLUMN     "completedCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "totalCount" INTEGER NOT NULL DEFAULT 0;

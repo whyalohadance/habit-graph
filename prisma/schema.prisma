@@ -67,13 +67,15 @@ model DailyCompletion {
 }
 
 model DailyScore {
-  id            String   @id @default(cuid())
-  date          DateTime
-  rawScore      Float    // доля выполненных задач за день (с учетом веса)
-  smoothedScore Float    // сглаженное значение (EMA) - это и есть точка на графике
+  id             String   @id @default(cuid())
+  date           DateTime
+  rawScore       Float    // доля выполненных задач за день (с учетом веса)
+  smoothedScore  Float    // сглаженное значение (EMA) - это и есть точка на графике
+  completedCount Int      @default(0) // сколько задач выполнено в этот день
+  totalCount     Int      @default(0) // сколько всего задач было в этот день
 
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
 }
