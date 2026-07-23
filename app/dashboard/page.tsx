@@ -70,16 +70,18 @@ export default function DashboardPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [streaks, setStreaks] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
   const loadData = async () => {
-    const [goalsRes, tasksRes, scoresRes] = await Promise.all([
+    const [goalsRes, tasksRes, scoresRes, streaksRes] = await Promise.all([
       fetch("/api/goals"),
       fetch("/api/tasks"),
       fetch(`/api/scores?year=${viewYear}&month=${viewMonth}`),
+      fetch("/api/streaks"),
     ]);
     setGoals(await goalsRes.json());
     setTasks(await tasksRes.json());
@@ -90,6 +92,7 @@ export default function DashboardPage() {
         date: new Date(s.date).getDate().toString(),
       }))
     );
+    setStreaks(await streaksRes.json());
   };
 
   useEffect(() => {
@@ -238,6 +241,11 @@ export default function DashboardPage() {
       className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3 hover:bg-slate-800"
     >
       <label className="flex flex-1 cursor-pointer items-center gap-3">
+        {task.isRecurring && streaks[task.id] > 0 && (
+          <span className="whitespace-nowrap rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400">
+            🔥 {streaks[task.id]}
+          </span>
+        )}
         <input
           type="checkbox"
           checked={completedToday.has(task.id)}
