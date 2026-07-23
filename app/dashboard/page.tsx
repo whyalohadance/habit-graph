@@ -65,6 +65,8 @@ export default function DashboardPage() {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedGoalId, setSelectedGoalId] = useState<string>("");
   const [taskType, setTaskType] = useState<"recurring" | "today">("recurring");
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth() + 1); // 1-12
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -74,9 +76,7 @@ export default function DashboardPage() {
     const [goalsRes, tasksRes, scoresRes] = await Promise.all([
       fetch("/api/goals"),
       fetch("/api/tasks"),
-      fetch(
-        `/api/scores?year=${today.getFullYear()}&month=${today.getMonth() + 1}`
-      ),
+      fetch(`/api/scores?year=${viewYear}&month=${viewMonth}`),
     ]);
     setGoals(await goalsRes.json());
     setTasks(await tasksRes.json());
@@ -91,7 +91,36 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") loadData();
-  }, [status]);
+  }, [status, viewYear, viewMonth]);
+
+  const goToPrevMonth = () => {
+    if (viewMonth === 1) {
+      setViewMonth(12);
+      setViewYear(viewYear - 1);
+    } else {
+      setViewMonth(viewMonth - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    const isCurrentMonth =
+      viewYear === today.getFullYear() && viewMonth === today.getMonth() + 1;
+    if (isCurrentMonth) return; // нельзя листать в будущее дальше текущего месяца
+    if (viewMonth === 12) {
+      setViewMonth(1);
+      setViewYear(viewYear + 1);
+    } else {
+      setViewMonth(viewMonth + 1);
+    }
+  };
+
+  const monthLabel = new Date(viewYear, viewMonth - 1).toLocaleDateString(
+    "ru-RU",
+    { month: "long", year: "numeric" }
+  );
+
+  const isCurrentMonth =
+    viewYear === today.getFullYear() && viewMonth === today.getMonth() + 1;
 
   const handleAddGoal = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +172,12 @@ export default function DashboardPage() {
     loadData();
   };
 
+  const deleteTask = async (taskId: string) => {
+    if (!confirm("Удалить эту задачу?")) return;
+    await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
+    loadData();
+  };
+
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-400">
@@ -157,26 +192,35 @@ export default function DashboardPage() {
   );
 
   const renderTask = (task: Task) => (
-    <label
+    <div
       key={task.id}
-      className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3 hover:bg-slate-800"
+      className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3 hover:bg-slate-800"
     >
-      <input
-        type="checkbox"
-        checked={completedToday.has(task.id)}
-        onChange={() => toggleTask(task.id)}
-        className="h-4 w-4 accent-indigo-500"
-      />
-      <span
-        className={
-          completedToday.has(task.id)
-            ? "text-slate-500 line-through"
-            : "text-white"
-        }
+      <label className="flex flex-1 cursor-pointer items-center gap-3">
+        <input
+          type="checkbox"
+          checked={completedToday.has(task.id)}
+          onChange={() => toggleTask(task.id)}
+          className="h-4 w-4 accent-indigo-500"
+        />
+        <span
+          className={
+            completedToday.has(task.id)
+              ? "text-slate-500 line-through"
+              : "text-white"
+          }
+        >
+          {task.title}
+        </span>
+      </label>
+      <button
+        onClick={() => deleteTask(task.id)}
+        className="text-slate-500 hover:text-red-400"
+        title="Удалить задачу"
       >
-        {task.title}
-      </span>
-    </label>
+        ✕
+      </button>
+    </div>
   );
 
   return (
@@ -204,9 +248,26 @@ export default function DashboardPage() {
         </header>
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="mb-4 text-lg font-medium">
-            Прогресс за {today.toLocaleDateString("ru-RU", { month: "long" })}
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-medium capitalize">
+              Прогресс за {monthLabel}
+            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPrevMonth}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+              >
+                ←
+              </button>
+              <button
+                onClick={goToNextMonth}
+                disabled={isCurrentMonth}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                →
+              </button>
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={scores}>
               <defs>
@@ -314,9 +375,20 @@ export default function DashboardPage() {
             {goals.map((g) => (
               <div
                 key={g.id}
-                className="rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3"
+                className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3"
               >
-                {g.title}
+                <span>{g.title}</span>
+                <button
+                  onClick={async () => {
+                    if (!confirm("Удалить эту цель?")) return;
+                    await fetch(`/api/goals/${g.id}`, { method: "DELETE" });
+                    loadData();
+                  }}
+                  className="text-slate-500 hover:text-red-400"
+                  title="Удалить цель"
+                >
+                  ✕
+                </button>
               </div>
             ))}
           </div>
