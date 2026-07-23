@@ -67,6 +67,9 @@ export default function DashboardPage() {
   const [taskType, setTaskType] = useState<"recurring" | "today">("recurring");
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1); // 1-12
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -178,6 +181,44 @@ export default function DashboardPage() {
     loadData();
   };
 
+  const startEditingTask = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditValue(task.title);
+  };
+
+  const saveTaskTitle = async (taskId: string) => {
+    if (!editValue.trim()) {
+      setEditingTaskId(null);
+      return;
+    }
+    await fetch(`/api/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editValue.trim() }),
+    });
+    setEditingTaskId(null);
+    loadData();
+  };
+
+  const startEditingGoal = (goal: Goal) => {
+    setEditingGoalId(goal.id);
+    setEditValue(goal.title);
+  };
+
+  const saveGoalTitle = async (goalId: string) => {
+    if (!editValue.trim()) {
+      setEditingGoalId(null);
+      return;
+    }
+    await fetch(`/api/goals/${goalId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editValue.trim() }),
+    });
+    setEditingGoalId(null);
+    loadData();
+  };
+
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-400">
@@ -203,15 +244,34 @@ export default function DashboardPage() {
           onChange={() => toggleTask(task.id)}
           className="h-4 w-4 accent-indigo-500"
         />
-        <span
-          className={
-            completedToday.has(task.id)
-              ? "text-slate-500 line-through"
-              : "text-white"
-          }
-        >
-          {task.title}
-        </span>
+        {editingTaskId === task.id ? (
+          <input
+            autoFocus
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={() => saveTaskTitle(task.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") saveTaskTitle(task.id);
+              if (e.key === "Escape") setEditingTaskId(null);
+            }}
+            onClick={(e) => e.preventDefault()}
+            className="flex-1 rounded border border-indigo-500 bg-slate-900 px-2 py-1 text-sm text-white outline-none"
+          />
+        ) : (
+          <span
+            onClick={(e) => {
+              e.preventDefault();
+              startEditingTask(task);
+            }}
+            className={
+              completedToday.has(task.id)
+                ? "text-slate-500 line-through"
+                : "cursor-text text-white hover:text-indigo-300"
+            }
+          >
+            {task.title}
+          </span>
+        )}
       </label>
       <button
         onClick={() => deleteTask(task.id)}
@@ -377,7 +437,26 @@ export default function DashboardPage() {
                 key={g.id}
                 className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3"
               >
-                <span>{g.title}</span>
+                {editingGoalId === g.id ? (
+                  <input
+                    autoFocus
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => saveGoalTitle(g.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveGoalTitle(g.id);
+                      if (e.key === "Escape") setEditingGoalId(null);
+                    }}
+                    className="flex-1 rounded border border-indigo-500 bg-slate-900 px-2 py-1 text-sm text-white outline-none"
+                  />
+                ) : (
+                  <span
+                    onClick={() => startEditingGoal(g)}
+                    className="cursor-text hover:text-indigo-300"
+                  >
+                    {g.title}
+                  </span>
+                )}
                 <button
                   onClick={async () => {
                     if (!confirm("Удалить эту цель?")) return;
