@@ -292,11 +292,11 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-8 text-white">
-      <div className="mx-auto max-w-4xl space-y-8">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">
+    <div className="min-h-screen bg-slate-950 px-3 py-6 text-white sm:px-4 sm:py-8">
+      <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-semibold sm:text-2xl">
               Привет, {session?.user?.name || session?.user?.email}
             </h1>
             <p className="text-sm text-slate-400">
@@ -309,15 +309,15 @@ export default function DashboardPage() {
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
+            className="self-start rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 sm:self-auto"
           >
             Выйти
           </button>
         </header>
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium capitalize">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-medium capitalize sm:text-lg">
               Прогресс за {monthLabel}
             </h2>
             <div className="flex items-center gap-2">
@@ -399,7 +399,7 @@ export default function DashboardPage() {
               onChange={(e) => setNewTaskTitle(e.target.value)}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm outline-none focus:border-indigo-500"
             />
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
               <select
                 value={taskType}
                 onChange={(e) =>
