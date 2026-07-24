@@ -8,6 +8,19 @@ const appleFontStack =
 export const metadata: Metadata = {
   title: "Habit Graph",
   description: "Track your goals and watch your progress grow",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Habit Graph",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport = {
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({
