@@ -230,6 +230,8 @@ export default function DashboardPage() {
     );
   }
 
+  const isNewUser = goals.length === 0 && tasks.length === 0;
+
   const recurringTasks = tasks.filter((t) => t.isRecurring);
   const todayOnlyTasks = tasks.filter(
     (t) => !t.isRecurring && t.date && toLocalDateString(new Date(t.date)) === todayStr
@@ -361,6 +363,24 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </section>
 
+        {isNewUser && (
+          <section className="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-6 text-center">
+            <p className="text-2xl">👋</p>
+            <h2 className="mt-2 text-lg font-medium text-white">
+              Добро пожаловать в Habit Graph!
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+              Здесь всё просто: добавь <span className="text-indigo-300">цель</span> (например
+              «Учить математику» или «Тренировка»), затем добавь к ней задачи.
+              Отмечай их выполненными каждый день — график ниже будет расти.
+              Пропустишь день — график плавно пойдёт вниз.
+            </p>
+            <p className="mt-3 text-sm text-slate-500">
+              Начни с формы «Твои цели» внизу страницы ↓
+            </p>
+          </section>
+        )}
+
         {/* Два столбца: глобальные цели + на сегодня */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
@@ -368,7 +388,9 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {recurringTasks.length === 0 && (
                 <p className="text-sm text-slate-500">
-                  Нет повторяющихся задач.
+                  {isNewUser
+                    ? "Сюда попадут задачи, которые нужно делать каждый день."
+                    : "Нет повторяющихся задач."}
                 </p>
               )}
               {recurringTasks.map(renderTask)}
@@ -380,7 +402,9 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {todayOnlyTasks.length === 0 && (
                 <p className="text-sm text-slate-500">
-                  Нет разовых задач на сегодня.
+                  {isNewUser
+                    ? "А сюда — разовые задачи только на сегодняшний день."
+                    : "Нет разовых задач на сегодня."}
                 </p>
               )}
               {todayOnlyTasks.map(renderTask)}
@@ -437,7 +461,9 @@ export default function DashboardPage() {
           <div className="space-y-2">
             {goals.length === 0 && (
               <p className="text-sm text-slate-500">
-                Пока нет целей — добавь первую ниже.
+                {isNewUser
+                  ? "Пока пусто. Впиши первую цель в поле ниже и нажми «Добавить» 👇"
+                  : "Пока нет целей — добавь первую ниже."}
               </p>
             )}
             {goals.map((g) => (
