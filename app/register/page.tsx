@@ -11,18 +11,32 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordTooShort = password.length > 0 && password.length < 8;
+  const emailInvalid =
+    email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const canSubmit =
+    email.length > 0 &&
+    password.length >= 8 &&
+    !emailInvalid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
+    if (!canSubmit) {
+      setError("Проверь email и пароль (минимум 8 символов)");
+      return;
+    }
+
+    setLoading(true);
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, name }),
     });
-
     setLoading(false);
 
     if (!res.ok) {
@@ -72,26 +86,52 @@ export default function RegisterPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-white placeholder-slate-500 outline-none focus:ring-1 ${
+              emailInvalid
+                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500"
+                : "border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+            }`}
           />
+          {emailInvalid && (
+            <p className="text-xs text-red-400">Похоже, email введён неверно</p>
+          )}
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-300">Пароль</label>
-          <input
-            type="password"
-            placeholder="Минимум 8 символов"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Минимум 8 символов"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`w-full rounded-lg border bg-slate-800 px-3 py-2 pr-10 text-white placeholder-slate-500 outline-none focus:ring-1 ${
+                passwordTooShort
+                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500"
+                  : "border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+              tabIndex={-1}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
+          </div>
+          {passwordTooShort && (
+            <p className="text-xs text-red-400">
+              Ещё {8 - password.length} символ(ов) до минимума
+            </p>
+          )}
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-indigo-600 py-2.5 font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+          className="w-full rounded-lg bg-indigo-600 py-2.5 font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Создаём аккаунт..." : "Зарегистрироваться"}
         </button>
