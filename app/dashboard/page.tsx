@@ -44,9 +44,9 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload || !payload.length) return null;
   const point = payload[0].payload as ScorePoint;
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2">
-      <p className="text-sm text-slate-400">День {label}</p>
-      <p className="text-sm font-medium text-indigo-300">
+    <div className="rounded-xl border border-[#D2D2D7]/60 bg-white/95 px-3 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)] backdrop-blur-sm">
+      <p className="text-xs text-[#86868B]">День {label}</p>
+      <p className="text-sm font-medium text-[#1D1D1F]">
         Выполнено {point.completedCount} из {point.totalCount} задач
       </p>
     </div>
@@ -66,7 +66,7 @@ export default function DashboardPage() {
   const [selectedGoalId, setSelectedGoalId] = useState<string>("");
   const [taskType, setTaskType] = useState<"recurring" | "today">("recurring");
   const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth() + 1); // 1-12
+  const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -111,7 +111,7 @@ export default function DashboardPage() {
   const goToNextMonth = () => {
     const isCurrentMonth =
       viewYear === today.getFullYear() && viewMonth === today.getMonth() + 1;
-    if (isCurrentMonth) return; // нельзя листать в будущее дальше текущего месяца
+    if (isCurrentMonth) return;
     if (viewMonth === 12) {
       setViewMonth(1);
       setViewYear(viewYear + 1);
@@ -224,7 +224,7 @@ export default function DashboardPage() {
 
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-400">
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F7] text-[#86868B]">
         Загрузка...
       </div>
     );
@@ -240,20 +240,20 @@ export default function DashboardPage() {
   const renderTask = (task: Task) => (
     <div
       key={task.id}
-      className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3 hover:bg-slate-800"
+      className="group flex items-center gap-3 rounded-xl border border-[#D2D2D7]/60 bg-white px-4 py-3 transition-all duration-200 hover:border-[#D2D2D7] hover:shadow-[0_2px_12px_rgba(0,0,0,0.04)]"
     >
       <label className="flex flex-1 cursor-pointer items-center gap-3">
-        {task.isRecurring && streaks[task.id] > 0 && (
-          <span className="whitespace-nowrap rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400">
-            🔥 {streaks[task.id]}
-          </span>
-        )}
         <input
           type="checkbox"
           checked={completedToday.has(task.id)}
           onChange={() => toggleTask(task.id)}
-          className="h-4 w-4 accent-indigo-500"
+          className="h-4 w-4 accent-[#0071E3] transition-transform duration-150 active:scale-90"
         />
+        {task.isRecurring && streaks[task.id] > 0 && (
+          <span className="whitespace-nowrap rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-600">
+            🔥 {streaks[task.id]}
+          </span>
+        )}
         {editingTaskId === task.id ? (
           <input
             autoFocus
@@ -265,7 +265,7 @@ export default function DashboardPage() {
               if (e.key === "Escape") setEditingTaskId(null);
             }}
             onClick={(e) => e.preventDefault()}
-            className="flex-1 rounded border border-indigo-500 bg-slate-900 px-2 py-1 text-sm text-white outline-none"
+            className="flex-1 rounded-lg border border-[#0071E3] bg-white px-2 py-1 text-sm text-[#1D1D1F] outline-none"
           />
         ) : (
           <span
@@ -275,8 +275,8 @@ export default function DashboardPage() {
             }}
             className={
               completedToday.has(task.id)
-                ? "text-slate-500 line-through"
-                : "cursor-text text-white hover:text-indigo-300"
+                ? "text-[#86868B] line-through"
+                : "cursor-text text-[#1D1D1F] transition-colors hover:text-[#0071E3]"
             }
           >
             {task.title}
@@ -285,7 +285,7 @@ export default function DashboardPage() {
       </label>
       <button
         onClick={() => deleteTask(task.id)}
-        className="text-slate-500 hover:text-red-400"
+        className="text-[#D2D2D7] opacity-0 transition-all duration-150 hover:text-red-500 group-hover:opacity-100"
         title="Удалить задачу"
       >
         ✕
@@ -294,30 +294,36 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 px-3 py-6 text-white sm:px-4 sm:py-8">
-      <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="truncate text-xl font-semibold sm:text-2xl">
-              Привет, {session?.user?.name || session?.user?.email}
-            </h1>
-            <p className="text-sm text-slate-400">
-              {today.toLocaleDateString("ru-RU", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F]">
+      <nav className="sticky top-0 z-10 border-b border-[#D2D2D7]/60 bg-white/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
+          <span className="text-[15px] font-semibold text-[#1D1D1F]">
+            Habit Graph
+          </span>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="self-start rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 sm:self-auto"
+            className="rounded-full border border-[#D2D2D7] px-4 py-1.5 text-sm text-[#1D1D1F] transition-all duration-150 hover:bg-[#F5F5F7] active:scale-[0.97]"
           >
             Выйти
           </button>
-        </header>
+        </div>
+      </nav>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="mx-auto max-w-4xl space-y-6 px-3 py-6 sm:space-y-8 sm:px-4 sm:py-8">
+        <div className="animate-fade-in-up">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Привет, {session?.user?.name || session?.user?.email}
+          </h1>
+          <p className="mt-1 text-[#6E6E73]">
+            {today.toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+
+        <section className="delay-100 animate-fade-in-up rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-base font-medium capitalize sm:text-lg">
               Прогресс за {monthLabel}
@@ -325,14 +331,14 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={goToPrevMonth}
-                className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+                className="rounded-full border border-[#D2D2D7] px-3 py-1.5 text-sm text-[#1D1D1F] transition-all duration-150 hover:bg-[#F5F5F7] active:scale-[0.95]"
               >
                 ←
               </button>
               <button
                 onClick={goToNextMonth}
                 disabled={isCurrentMonth}
-                className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
+                className="rounded-full border border-[#D2D2D7] px-3 py-1.5 text-sm text-[#1D1D1F] transition-all duration-150 hover:bg-[#F5F5F7] active:scale-[0.95] disabled:cursor-not-allowed disabled:opacity-30 disabled:active:scale-100"
               >
                 →
               </button>
@@ -342,52 +348,53 @@ export default function DashboardPage() {
             <AreaChart data={scores}>
               <defs>
                 <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#818cf8" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#34C759" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#34C759" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
-              <ReferenceLine y={0} stroke="#334155" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E5EA" />
+              <XAxis dataKey="date" stroke="#86868B" fontSize={12} />
+              <YAxis stroke="#86868B" fontSize={12} />
+              <ReferenceLine y={0} stroke="#D2D2D7" />
               <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
                 dataKey="smoothedScore"
-                stroke="#818cf8"
+                stroke="#34C759"
                 strokeWidth={2.5}
                 fill="url(#scoreGradient)"
                 dot={false}
+                animationDuration={800}
+                animationEasing="ease-out"
               />
             </AreaChart>
           </ResponsiveContainer>
         </section>
 
         {isNewUser && (
-          <section className="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-6 text-center">
+          <section className="delay-200 animate-fade-in-up rounded-3xl border border-[#0071E3]/20 bg-[#0071E3]/5 p-6 text-center">
             <p className="text-2xl">👋</p>
-            <h2 className="mt-2 text-lg font-medium text-white">
+            <h2 className="mt-2 text-lg font-medium text-[#1D1D1F]">
               Добро пожаловать в Habit Graph!
             </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
-              Здесь всё просто: добавь <span className="text-indigo-300">цель</span> (например
+            <p className="mx-auto mt-2 max-w-md text-sm text-[#6E6E73]">
+              Здесь всё просто: добавь <span className="text-[#0071E3]">цель</span> (например
               «Учить математику» или «Тренировка»), затем добавь к ней задачи.
-              Отмечай их выполненными каждый день — график ниже будет расти.
+              Отмечай их выполненными каждый день — график выше будет расти.
               Пропустишь день — график плавно пойдёт вниз.
             </p>
-            <p className="mt-3 text-sm text-slate-500">
+            <p className="mt-3 text-sm text-[#86868B]">
               Начни с формы «Твои цели» внизу страницы ↓
             </p>
           </section>
         )}
 
-        {/* Два столбца: глобальные цели + на сегодня */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <section className="delay-200 animate-fade-in-up rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
             <h2 className="mb-4 text-lg font-medium">Глобальные цели</h2>
             <div className="space-y-2">
               {recurringTasks.length === 0 && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#86868B]">
                   {isNewUser
                     ? "Сюда попадут задачи, которые нужно делать каждый день."
                     : "Нет повторяющихся задач."}
@@ -397,11 +404,11 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <section className="delay-200 animate-fade-in-up rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
             <h2 className="mb-4 text-lg font-medium">На сегодня</h2>
             <div className="space-y-2">
               {todayOnlyTasks.length === 0 && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#86868B]">
                   {isNewUser
                     ? "А сюда — разовые задачи только на сегодняшний день."
                     : "Нет разовых задач на сегодня."}
@@ -412,8 +419,7 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* Добавление новой задачи */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <section className="rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
           <h2 className="mb-4 text-lg font-medium">Добавить задачу</h2>
           <form onSubmit={handleAddTask} className="space-y-3">
             <input
@@ -421,7 +427,7 @@ export default function DashboardPage() {
               placeholder="Название задачи..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm outline-none transition-all duration-200 focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]"
             />
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
               <select
@@ -429,7 +435,7 @@ export default function DashboardPage() {
                 onChange={(e) =>
                   setTaskType(e.target.value as "recurring" | "today")
                 }
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm"
+                className="rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F]"
               >
                 <option value="recurring">Глобальная (каждый день)</option>
                 <option value="today">Только на сегодня</option>
@@ -437,7 +443,7 @@ export default function DashboardPage() {
               <select
                 value={selectedGoalId}
                 onChange={(e) => setSelectedGoalId(e.target.value)}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm"
+                className="rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm text-[#1D1D1F]"
               >
                 <option value="">Без цели</option>
                 {goals.map((g) => (
@@ -448,7 +454,7 @@ export default function DashboardPage() {
               </select>
               <button
                 type="submit"
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500"
+                className="rounded-full bg-[#0071E3] px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-[#0077ED] active:scale-[0.97]"
               >
                 Добавить
               </button>
@@ -456,11 +462,11 @@ export default function DashboardPage() {
           </form>
         </section>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <section className="rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
           <h2 className="mb-4 text-lg font-medium">Твои цели</h2>
           <div className="space-y-2">
             {goals.length === 0 && (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[#86868B]">
                 {isNewUser
                   ? "Пока пусто. Впиши первую цель в поле ниже и нажми «Добавить» 👇"
                   : "Пока нет целей — добавь первую ниже."}
@@ -469,7 +475,7 @@ export default function DashboardPage() {
             {goals.map((g) => (
               <div
                 key={g.id}
-                className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-3"
+                className="group flex items-center justify-between rounded-xl border border-[#D2D2D7]/60 bg-white px-4 py-3 transition-all duration-200 hover:border-[#D2D2D7] hover:shadow-[0_2px_12px_rgba(0,0,0,0.04)]"
               >
                 {editingGoalId === g.id ? (
                   <input
@@ -481,12 +487,12 @@ export default function DashboardPage() {
                       if (e.key === "Enter") saveGoalTitle(g.id);
                       if (e.key === "Escape") setEditingGoalId(null);
                     }}
-                    className="flex-1 rounded border border-indigo-500 bg-slate-900 px-2 py-1 text-sm text-white outline-none"
+                    className="flex-1 rounded-lg border border-[#0071E3] bg-white px-2 py-1 text-sm text-[#1D1D1F] outline-none"
                   />
                 ) : (
                   <span
                     onClick={() => startEditingGoal(g)}
-                    className="cursor-text hover:text-indigo-300"
+                    className="cursor-text text-[#1D1D1F] transition-colors hover:text-[#0071E3]"
                   >
                     {g.title}
                   </span>
@@ -497,7 +503,7 @@ export default function DashboardPage() {
                     await fetch(`/api/goals/${g.id}`, { method: "DELETE" });
                     loadData();
                   }}
-                  className="text-slate-500 hover:text-red-400"
+                  className="text-[#D2D2D7] opacity-0 transition-all duration-150 hover:text-red-500 group-hover:opacity-100"
                   title="Удалить цель"
                 >
                   ✕
@@ -512,11 +518,11 @@ export default function DashboardPage() {
               placeholder="Новая цель (например: Учить математику)..."
               value={newGoalTitle}
               onChange={(e) => setNewGoalTitle(e.target.value)}
-              className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+              className="flex-1 rounded-xl border border-[#D2D2D7] bg-white px-3.5 py-2.5 text-sm outline-none transition-all duration-200 focus:border-[#0071E3] focus:ring-1 focus:ring-[#0071E3]"
             />
             <button
               type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500"
+              className="rounded-full bg-[#0071E3] px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-[#0077ED] active:scale-[0.97]"
             >
               Добавить
             </button>
