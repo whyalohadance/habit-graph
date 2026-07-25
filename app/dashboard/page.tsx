@@ -237,6 +237,23 @@ export default function DashboardPage() {
     (t) => !t.isRecurring && t.date && toLocalDateString(new Date(t.date)) === todayStr
   );
 
+  const groupByGoal = (list: Task[]) => {
+    const groups: { goalId: string | null; goalTitle: string; tasks: Task[] }[] = [];
+    for (const g of goals) {
+      const matched = list.filter((t) => t.goalId === g.id);
+      if (matched.length > 0) {
+        groups.push({ goalId: g.id, goalTitle: g.title, tasks: matched });
+      }
+    }
+    const noGoalTasks = list.filter(
+      (t) => !t.goalId || !goals.some((g) => g.id === t.goalId)
+    );
+    if (noGoalTasks.length > 0) {
+      groups.push({ goalId: null, goalTitle: "Без цели", tasks: noGoalTasks });
+    }
+    return groups;
+  };
+
   const renderTask = (task: Task) => (
     <div
       key={task.id}
@@ -392,30 +409,46 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <section className="delay-200 animate-fade-in-up rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
             <h2 className="mb-4 text-lg font-medium">Глобальные цели</h2>
-            <div className="space-y-2">
-              {recurringTasks.length === 0 && (
-                <p className="text-sm text-[#86868B]">
-                  {isNewUser
-                    ? "Сюда попадут задачи, которые нужно делать каждый день."
-                    : "Нет повторяющихся задач."}
-                </p>
-              )}
-              {recurringTasks.map(renderTask)}
-            </div>
+            {recurringTasks.length === 0 ? (
+              <p className="text-sm text-[#86868B]">
+                {isNewUser
+                  ? "Сюда попадут задачи, которые нужно делать каждый день."
+                  : "Нет повторяющихся задач."}
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {groupByGoal(recurringTasks).map((group) => (
+                  <div key={group.goalId ?? "none"}>
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#86868B]">
+                      {group.goalTitle}
+                    </p>
+                    <div className="space-y-2">{group.tasks.map(renderTask)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="delay-200 animate-fade-in-up rounded-3xl border border-[#D2D2D7]/60 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
             <h2 className="mb-4 text-lg font-medium">На сегодня</h2>
-            <div className="space-y-2">
-              {todayOnlyTasks.length === 0 && (
-                <p className="text-sm text-[#86868B]">
-                  {isNewUser
-                    ? "А сюда — разовые задачи только на сегодняшний день."
-                    : "Нет разовых задач на сегодня."}
-                </p>
-              )}
-              {todayOnlyTasks.map(renderTask)}
-            </div>
+            {todayOnlyTasks.length === 0 ? (
+              <p className="text-sm text-[#86868B]">
+                {isNewUser
+                  ? "А сюда — разовые задачи только на сегодняшний день."
+                  : "Нет разовых задач на сегодня."}
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {groupByGoal(todayOnlyTasks).map((group) => (
+                  <div key={group.goalId ?? "none"}>
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#86868B]">
+                      {group.goalTitle}
+                    </p>
+                    <div className="space-y-2">{group.tasks.map(renderTask)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
 
