@@ -36,7 +36,14 @@ async function computeAndSaveDay(userId: string, dayStart: Date) {
 
   // Если в этот день вообще не было задач - день нейтральный, не наказываем и не поощряем.
   // Иначе превращаем долю выполненного в очки: 100% = +10, 0% = -10, 50% = 0.
-  const dailyPoints = totalWeight > 0 ? (rawScore - 0.5) * 20 : 0;
+  let dailyPoints = totalWeight > 0 ? (rawScore - 0.5) * 20 : 0;
+
+  // Смягчаем падение при пропусках: рост за выполнение идёт в полную силу,
+  // а спад за невыполнение - вполовину мягче, чтобы несколько дней молчания
+  // не обнуляли прогресс за месяц слишком резко, но честно продолжали тянуть вниз.
+  if (dailyPoints < 0) {
+    dailyPoints *= 0.5;
+  }
 
   const prevDay = new Date(dayStart);
   prevDay.setDate(prevDay.getDate() - 1);
