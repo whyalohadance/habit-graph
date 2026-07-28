@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Habit Graph
 
-## Getting Started
+Веб-приложение для отслеживания целей и привычек, где твой прогресс визуализируется живым графиком: выполняешь задачи — график растёт, пропускаешь дни — плавно снижается.
 
-First, run the development server:
+🔗 **Живая версия:** [habit-graph.vercel.app](https://habit-graph.vercel.app)
+
+## Идея
+
+В начале задаёшь себе цели (например «Учить математику» или «Тренировка») и привязываешь к ним задачи — повторяющиеся каждый день или разовые на конкретную дату. Каждый день отмечаешь, что выполнено. На основе этого строится сглаженный график прогресса за месяц, который хранится в истории аккаунта.
+
+- Выполнил задачи — график растёт
+- Пропустил день — график плавно идёт вниз (без резких обвалов)
+- Задачи группируются по целям, чтобы сразу видеть, что к чему относится
+- Отдельно считаются «стрики» — сколько дней подряд задача выполняется без пропуска
+
+## Стек
+
+- **Next.js 16** (App Router, TypeScript) — фронтенд и бэкенд в одном проекте
+- **Prisma 7** — ORM
+- **PostgreSQL** — база данных (Neon в проде, Docker локально)
+- **NextAuth.js** — аутентификация (email + пароль)
+- **Recharts** — визуализация графика
+- **Tailwind CSS** — стили, светлая тема в духе минимализма Apple
+- **Vercel** — хостинг и деплой
+
+## Возможности
+
+- Регистрация и вход с валидацией форм
+- Создание целей и привязанных к ним задач (повторяющиеся / разовые)
+- Отметка выполнения задач на каждый день
+- График прогресса с навигацией по месяцам
+- Группировка задач по целям
+- Счётчик стриков для повторяющихся задач
+- Редактирование и удаление целей/задач
+- Адаптивный дизайн (мобильные устройства и десктоп)
+- PWA — можно установить как приложение на телефон
+
+## Локальный запуск
 
 ```bash
+git clone https://github.com/whyalohadance/habit-graph.git
+cd habit-graph
+npm install
+
+# Поднять локальную PostgreSQL
+docker compose up -d
+
+# Настроить .env (пример ниже)
+cp .env.example .env
+
+# Применить миграции
+npx prisma migrate dev
+
+# Запустить
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Пример `.env`:
+cat > README.md << 'EOF'
+# Habit Graph
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Веб-приложение для отслеживания целей и привычек, где твой прогресс визуализируется живым графиком: выполняешь задачи — график растёт, пропускаешь дни — плавно снижается.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🔗 **Живая версия:** [habit-graph.vercel.app](https://habit-graph.vercel.app)
 
-## Learn More
+## Идея
 
-To learn more about Next.js, take a look at the following resources:
+В начале задаёшь себе цели (например «Учить математику» или «Тренировка») и привязываешь к ним задачи — повторяющиеся каждый день или разовые на конкретную дату. Каждый день отмечаешь, что выполнено. На основе этого строится сглаженный график прогресса за месяц, который хранится в истории аккаунта.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Выполнил задачи — график растёт
+- Пропустил день — график плавно идёт вниз (без резких обвалов)
+- Задачи группируются по целям, чтобы сразу видеть, что к чему относится
+- Отдельно считаются «стрики» — сколько дней подряд задача выполняется без пропуска
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Стек
 
-## Deploy on Vercel
+- **Next.js 16** (App Router, TypeScript) — фронтенд и бэкенд в одном проекте
+- **Prisma 7** — ORM
+- **PostgreSQL** — база данных (Neon в проде, Docker локально)
+- **NextAuth.js** — аутентификация (email + пароль)
+- **Recharts** — визуализация графика
+- **Tailwind CSS** — стили, светлая тема в духе минимализма Apple
+- **Vercel** — хостинг и деплой
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Возможности
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Регистрация и вход с валидацией форм
+- Создание целей и привязанных к ним задач (повторяющиеся / разовые)
+- Отметка выполнения задач на каждый день
+- График прогресса с навигацией по месяцам
+- Группировка задач по целям
+- Счётчик стриков для повторяющихся задач
+- Редактирование и удаление целей/задач
+- Адаптивный дизайн (мобильные устройства и десктоп)
+- PWA — можно установить как приложение на телефон
+
+## Локальный запуск
+
+```bash
+git clone https://github.com/whyalohadance/habit-graph.git
+cd habit-graph
+npm install
+
+# Поднять локальную PostgreSQL
+docker compose up -d
+
+# Настроить .env (пример ниже)
+cp .env.example .env
+
+# Применить миграции
+npx prisma migrate dev
+
+# Запустить
+npm run dev
+```
+
+Пример `.env`:
+DATABASE_URL="postgresql://habitgraph:habitgraph@localhost:5433/habitgraph" AUTH_SECRET="сгенерируй через: openssl rand -base64 32"
+
+## Структура проекта
+app/ api/ - API-роуты (auth, goals, tasks, scores, streaks) dashboard/ - главная страница приложения login/ - страница входа register/ - страница регистрации lib/ score.ts - логика расчёта прогресса и графика streak.ts - логика подсчёта стриков prisma.ts - Prisma Client prisma/ schema.prisma - модели данных
+
+## Автор
+
+Проект создан как pet-проект для практики full-stack разработки — Next.js, Prisma, PostgreSQL, деплой на Vercel с облачной базой на Neon.
